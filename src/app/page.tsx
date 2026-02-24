@@ -282,7 +282,7 @@ export default function Home() {
             <div className="flex items-start gap-4 shrink-0">
               <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-slate-800">
                 <Image
-                  src="/images/home/author-thumb.jpg"
+                  src="/images/home/author.jpg"
                   alt=""
                   fill
                   className="object-cover"
