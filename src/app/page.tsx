@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Calculator, Shield, TrendingUp, ArrowRight } from 'lucide-react';
+import { Calculator, Shield, TrendingUp, ArrowRight, Globe } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -297,15 +297,33 @@ export default function Home() {
             <div className="flex-1">
               <p className="font-bold text-slate-200 mb-3">Contact me</p>
               <hr className="border-slate-700 mb-3" />
-              <a
-                href="https://www.facebook.com/juicesakkasem.supp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 hover:border-cyan-500/50 hover:text-cyan-400 transition-colors"
-              >
-                <Image src="/images/home/icon-download.png" alt="" width={20} height={20} className="opacity-80" />
-                Facebook
-              </a>
+              <div className="flex flex-col gap-3">
+                <a
+                  href="https://www.facebook.com/juicesakkasem.supp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 hover:border-cyan-500/50 hover:text-cyan-400 transition-colors"
+                >
+                  <Image
+                    src="/images/home/icon-download.png"
+                    alt=""
+                    width={20}
+                    height={20}
+                    className="opacity-80"
+                  />
+                  Facebook
+                </a>
+
+                <a
+                  href="https://cashualme.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 hover:border-cyan-500/50 hover:text-cyan-400 transition-colors"
+                >
+                  <Globe className="w-5 h-5 text-[#F7931A]" />
+                  Cashual Me
+                </a>
+              </div>
             </div>
           </div>
           <div className="mt-8 text-sm text-slate-500">

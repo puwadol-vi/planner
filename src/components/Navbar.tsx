@@ -10,8 +10,7 @@ const navLinks = [
 export default function Navbar() {
   return (
     <nav
-      className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 shadow-md"
-      style={{ backgroundColor: "#F7931A" }}
+      className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 shadow-md bg-[#F7931A]"
     >
       <Link
         href="/"
