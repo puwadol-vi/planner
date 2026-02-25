@@ -3,6 +3,7 @@ import Image from "next/image";
 
 const navLinks = [
   { href: "/bitcoin-wealth-planner", label: "Wealth Planner" },
+  { href: "/bitcoin-dca-master", label: "DCA Master" },
   { href: "/bitcoin-vs-insurance-simulator", label: "BTC vs Insurance" },
   { href: "/when-should-i-invest", label: "When to Invest" },
 ];
