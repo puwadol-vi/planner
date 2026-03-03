@@ -1,6 +1,51 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+
+function InputGroupWithTooltip({
+  label,
+  value,
+  onChange,
+  borderColor,
+  hint,
+  tooltip,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  borderColor: string;
+  hint: string;
+  tooltip: React.ReactNode;
+}) {
+  const hintColor =
+    borderColor === 'border-emerald-500'
+      ? 'text-emerald-400'
+      : borderColor === 'border-cyan-400'
+        ? 'text-cyan-400'
+        : 'text-orange-400';
+  return (
+    <div
+      className={`group relative rounded-xl bg-slate-700/50 p-4 border-t-4 transition focus-within:ring-2 focus-within:ring-sky-400/50 ${borderColor}`}
+    >
+      <label className="flex justify-between items-center text-slate-400 text-sm font-semibold mb-2">
+        {label}
+        <span className="w-4 h-4 rounded-full bg-slate-600 text-[10px] flex items-center justify-center text-slate-300 cursor-help">
+          ?
+        </span>
+      </label>
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value) ?? 0)}
+        className="w-full bg-transparent border-b-2 border-slate-500 text-white text-xl font-semibold outline-none focus:border-sky-400 pb-1 transition"
+      />
+      <p className={`text-xs mt-2 font-medium ${hintColor}`}>{hint}</p>
+      <div className="absolute bottom-[105%] left-0 hidden group-hover:block w-64 bg-slate-800 text-slate-200 text-xs p-3 rounded-xl border border-slate-600 shadow-2xl z-50">
+        {tooltip}
+      </div>
+    </div>
+  );
+}
 import {
   LineChart,
   Line,
@@ -13,8 +58,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 
-const RATE_SPX = 0.12;
-const RATE_UST = 0.03;
+const RATE_UST = 0.04; // พันธบัตรรัฐบาล 4%
 const YEARS = 20;
 
 function formatMoney(num: number): string {
@@ -24,6 +68,7 @@ function formatMoney(num: number): string {
 export default function BitcoinWealthPlannerPage() {
   const [initial, setInitial] = useState(0);
   const [dca, setDca] = useState(120000);
+  const [rateSPX, setRateSPX] = useState(12);
   const [rateBTC, setRateBTC] = useState(30);
   const [inflationRate, setInflationRate] = useState(3);
   const [triggerX, setTriggerX] = useState(10);
@@ -31,7 +76,9 @@ export default function BitcoinWealthPlannerPage() {
 
   const { chartData, dispSPX, dispTake, dispHODL, s4TriggerYear } = useMemo(() => {
     const rBTC = rateBTC / 100;
+    const rSPX = rateSPX / 100;
     const infl = inflationRate / 100;
+    const effectiveTrigger = triggerX || 10;
 
     const rawSPX: number[] = [initial];
     const rawTake: number[] = [initial];
@@ -46,7 +93,7 @@ export default function BitcoinWealthPlannerPage() {
     for (let i = 1; i <= YEARS; i++) {
       const discountFactor = showRealValue ? Math.pow(1 + infl, i) : 1;
 
-      const val2 = (rawSPX[i - 1] + dca) * (1 + RATE_SPX);
+      const val2 = (rawSPX[i - 1] + dca) * (1 + rSPX);
       rawSPX.push(val2);
       dispSPX.push(val2 / discountFactor);
 
@@ -58,7 +105,7 @@ export default function BitcoinWealthPlannerPage() {
       const totalPrincipal = initial + dca * i;
       const checkValue = rawTake[i - 1];
 
-      if (i > 1 && checkValue > totalPrincipal * triggerX) {
+      if (i > 1 && checkValue > totalPrincipal * effectiveTrigger) {
         s4Triggered = true;
         if (s4TriggerYear === -1) s4TriggerYear = i - 1;
       }
@@ -87,7 +134,7 @@ export default function BitcoinWealthPlannerPage() {
       dispHODL,
       s4TriggerYear,
     };
-  }, [initial, dca, rateBTC, inflationRate, triggerX, showRealValue]);
+  }, [initial, dca, rateSPX, rateBTC, inflationRate, triggerX, showRealValue]);
 
   const typeText = showRealValue ? 'หักเงินเฟ้อแล้ว' : 'ยังไม่หักเงินเฟ้อ';
   const finalSPX = dispSPX[YEARS];
@@ -117,10 +164,9 @@ export default function BitcoinWealthPlannerPage() {
 
         {/* Control Panel */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700 shadow-xl">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-              🛠️ กำหนดแผนการลงทุน (Your Plan)
-            </h3>
+          {/* Section 1: Input */}
+          <h3 className="text-white font-semibold mb-4 flex items-center justify-between text-lg border-b border-slate-700 pb-2">
+            <span className="flex items-center gap-2">📝 Input (ข้อมูลพื้นฐาน)</span>
             <div className="flex items-center gap-3 bg-slate-900 px-4 py-2 rounded-lg border border-slate-700">
               <span className="text-sm font-semibold text-slate-300">
                 หักเงินเฟ้อ (Real Value)
@@ -138,14 +184,14 @@ export default function BitcoinWealthPlannerPage() {
                 />
               </button>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <InputGroup
               label="เริ่มต้น (บาท)"
               value={initial}
               onChange={setInitial}
               borderColor="border-blue-500"
+              hint="เงินก้อนแรก"
             />
             <InputGroup
               label="ออมเพิ่มต่อปี (บาท)"
@@ -155,12 +201,6 @@ export default function BitcoinWealthPlannerPage() {
               hint="เฉลี่ยเดือนละ 10,000 บาท"
             />
             <InputGroup
-              label="Bitcoin Growth (%)"
-              value={rateBTC}
-              onChange={setRateBTC}
-              borderColor="border-orange-500"
-            />
-            <InputGroup
               label="อัตราเงินเฟ้อ (%)"
               value={inflationRate}
               onChange={setInflationRate}
@@ -168,23 +208,55 @@ export default function BitcoinWealthPlannerPage() {
               hint="ลดทอนมูลค่าเงินในอนาคต"
               step={0.1}
             />
-            <div className="relative overflow-hidden rounded-xl bg-slate-700/50 p-4 border-t-4 border-cyan-400">
-              <div className="absolute top-0 right-0 bg-cyan-500 text-white text-[10px] px-2 py-1 rounded-bl">
-                RECOMMENDED
-              </div>
-              <label className="block text-slate-400 text-sm font-semibold mb-2">
-                Take Profit Trigger (x)
-              </label>
-              <input
-                type="number"
-                value={triggerX}
-                onChange={(e) => setTriggerX(Number(e.target.value) || 10)}
-                className="w-full bg-transparent border-b-2 border-slate-500 text-white text-xl font-semibold outline-none focus:border-cyan-400 pb-1 transition"
-              />
-              <p className="text-xs text-slate-400 mt-2">
-                ขาย 50% เมื่อโต X เท่า
-              </p>
-            </div>
+          </div>
+
+          {/* Section 2: Your Plan */}
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2 text-lg border-b border-slate-700 pb-2">
+            🛠️ กำหนดแผนการลงทุน (Your Plan)
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <InputGroupWithTooltip
+              label="S&P 500 (%)"
+              value={rateSPX}
+              onChange={setRateSPX}
+              borderColor="border-emerald-500"
+              hint="📌 Traditional Plan"
+              tooltip={
+                <>
+                  <strong>Traditional Plan:</strong>
+                  <br />
+                  นำเงินไป DCA ในดัชนีหุ้นสหรัฐฯ 500 บริษัทชั้นนำ
+                </>
+              }
+            />
+            <InputGroupWithTooltip
+              label="Take Profit Trigger (x)"
+              value={triggerX}
+              onChange={(v) => setTriggerX(v || 10)}
+              borderColor="border-cyan-400"
+              hint="📌 Smart Bitcoin Plan"
+              tooltip={
+                <>
+                  <strong>Smart Bitcoin Plan :</strong>
+                  <br />
+                  ลงทุน Bitcoin แต่ตั้งเป้าหมายไว้ถ้าพอร์ตโตเกิน X เท่าเมื่อไหร่ ให้ &quot;ล็อคกำไร 50%&quot; ย้ายไปพักในพันธบัตรรัฐบาล 4%
+                </>
+              }
+            />
+            <InputGroupWithTooltip
+              label="Bitcoin Growth (%)"
+              value={rateBTC}
+              onChange={setRateBTC}
+              borderColor="border-orange-500"
+              hint="📌 Max HODL Plan"
+              tooltip={
+                <>
+                  <strong>Max HODL Plan :</strong>
+                  <br />
+                  นำเงินไป DCA ใน Bitcoin แบบ 100% ถือยาว
+                </>
+              }
+            />
           </div>
         </div>
 
@@ -192,7 +264,7 @@ export default function BitcoinWealthPlannerPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <ResultCard
             label="Traditional Plan"
-            badge="Low Risk"
+            badge="Standard"
             value={formatMoney(finalSPX)}
             sub="S&P 500 Strategy"
             borderColor="border-emerald-500"
@@ -214,10 +286,11 @@ export default function BitcoinWealthPlannerPage() {
             subColor="text-cyan-400"
             typeText={typeText}
             hero
+            noTargetBadge
           />
           <ResultCard
             label="Max HODL Plan"
-            badge="High Risk"
+            badge="Holder"
             value={formatMoney(finalHODL)}
             sub="100% BTC Exposure"
             borderColor="border-orange-500"
@@ -311,9 +384,10 @@ export default function BitcoinWealthPlannerPage() {
                 <Line
                   type="monotone"
                   dataKey="hodl"
-                  name="Bitcoin HODL (High Risk)"
+                  name="Bitcoin HODL (Holder)"
                   stroke="#f97316"
-                  strokeWidth={2}
+                  strokeWidth={1}
+                  fill="rgba(249, 115, 22, 0.05)"
                   dot={false}
                 />
                 <Line
@@ -339,8 +413,8 @@ export default function BitcoinWealthPlannerPage() {
                     <span className="mt-2 block text-red-300">
                       <br />
                       ⚠️ <strong>Reality Check:</strong> ตัวเลขที่คุณเห็นตอนนี้คือ{' '}
-                      <strong>&quot;อำนาจซื้อที่แท้จริง&quot;</strong> หลังหักเงินเฟ้อ{' '}
-                      {inflationRate}% แล้ว จะเห็นว่าแม้ตัวเลขจะลดลงมา แต่แผน Smart
+                      <strong>&quot;อำนาจซื้อที่แท้จริง&quot;</strong> หลังหักเงินเฟ้อ {inflationRate}%
+                      แล้ว จะเห็นว่าแม้ตัวเลขจะลดลงมา แต่แผน Smart
                       Hybrid ก็ยังเพียงพอที่จะซื้ออิสรภาพให้คุณได้จริง
                       โดยไม่ต้องเสี่ยงเกินไปในช่วงบั้นปลาย
                     </span>
@@ -412,6 +486,7 @@ interface ResultCardProps {
   subColor: string;
   typeText: string;
   hero?: boolean;
+  noTargetBadge?: boolean;
 }
 
 function ResultCard({
@@ -426,12 +501,13 @@ function ResultCard({
   subColor,
   typeText,
   hero,
+  noTargetBadge,
 }: ResultCardProps) {
   return (
     <div
-      className={`relative rounded-2xl p-6 border shadow-xl ${borderColor} ${bgColor} ${hero ? 'md:-translate-y-2 border shadow-cyan-500/20' : 'border-slate-700'}`}
+      className={`relative rounded-2xl p-6 border shadow-xl ${borderColor} ${bgColor} ${hero ? 'md:-translate-y-2 border shadow-cyan-500/20 shadow-lg' : 'border-slate-700'}`}
     >
-      {hero && (
+      {hero && !noTargetBadge && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-cyan-500 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg z-10">
           🌟 YOUR TARGET
         </div>
@@ -442,7 +518,7 @@ function ResultCard({
         </div>
         <div className={`text-xs px-2 py-1 rounded ${badgeClass}`}>{badge}</div>
       </div>
-      <div className="text-2xl font-bold text-white mb-1">{value}</div>
+      <div className={`font-bold text-white mb-1 ${hero ? 'text-3xl' : 'text-2xl'}`}>{value}</div>
       <div className={`text-sm flex items-center gap-1 ${subColor}`}>
         {sub}{' '}
         <span className="text-[10px] bg-slate-800 px-1 rounded text-slate-400">
