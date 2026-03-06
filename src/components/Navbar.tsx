@@ -6,6 +6,7 @@ const navLinks = [
   { href: "/bitcoin-dca-master", label: "DCA Master" },
   { href: "/bitcoin-vs-insurance-simulator", label: "BTC vs Insurance" },
   { href: "/when-should-i-invest", label: "When to Invest" },
+  { href: "/purchasing-power", label: "Purchasing Power" },
 ];
 
 export default function Navbar() {
