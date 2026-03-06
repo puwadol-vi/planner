@@ -19,16 +19,17 @@ import {
   Legend,
   ReferenceLine,
 } from 'recharts';
-import type { TooltipProps } from 'recharts';
 
 const DATA_KEY_NOMINAL = 'ตัวเลขเงินในบัญชี';
 const DATA_KEY_REAL = 'มูลค่าจริง (อำนาจซื้อ)';
+const DATA_KEY_INVEST_NOMINAL = 'ตัวเลขพอร์ต (ยังไม่หักเงินเฟ้อ)';
 const DATA_KEY_INVEST = 'เก็บในสินทรัพย์เก็บมูลค่า (อำนาจซื้อ)';
 
 type ChartPoint = {
   year: string;
   [DATA_KEY_NOMINAL]: number;
   [DATA_KEY_REAL]: number;
+  [DATA_KEY_INVEST_NOMINAL]: number;
   [DATA_KEY_INVEST]: number;
 };
 
@@ -55,6 +56,7 @@ export default function PurchasingPowerPage() {
         year: `ย้อนหลัง ${Math.abs(year)} ปี`,
         [DATA_KEY_NOMINAL]: Math.round(currentSavings),
         [DATA_KEY_REAL]: Math.round(realValue),
+        [DATA_KEY_INVEST_NOMINAL]: Math.round(currentSavings),
         [DATA_KEY_INVEST]: Math.round(realValue),
       });
     }
@@ -79,6 +81,7 @@ export default function PurchasingPowerPage() {
         year: year === 0 ? 'ปัจจุบัน' : `ปีที่ ${year}`,
         [DATA_KEY_NOMINAL]: Math.round(nominal),
         [DATA_KEY_REAL]: Math.round(realValue),
+        [DATA_KEY_INVEST_NOMINAL]: Math.round(invested),
         [DATA_KEY_INVEST]: Math.round(realInvestedValue),
       });
     }
@@ -97,17 +100,21 @@ export default function PurchasingPowerPage() {
     active,
     payload,
     label,
-  }: TooltipProps<number, string>) => {
+  }: {
+    active?: boolean;
+    payload?: Array<{ name: string; value: number; dataKey: string; color: string }>;
+    label?: string;
+  }) => {
     if (!active || !payload || payload.length < 2) return null;
     const nominal =
-      payload.find((p) => p.dataKey === DATA_KEY_NOMINAL)?.value ?? 0;
+      payload.find((p: { dataKey: string }) => p.dataKey === DATA_KEY_NOMINAL)?.value ?? 0;
     const real =
-      payload.find((p) => p.dataKey === DATA_KEY_REAL)?.value ?? 0;
+      payload.find((p: { dataKey: string }) => p.dataKey === DATA_KEY_REAL)?.value ?? 0;
 
     return (
       <div className="bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-700">
         <p className="font-bold text-slate-200 mb-2">{label}</p>
-        {payload.map((entry, index) => (
+        {payload.map((entry: { name: string; value: number; color: string }, index: number) => (
           <div
             key={index}
             className="flex items-center gap-2 text-sm mb-1"
@@ -326,24 +333,44 @@ export default function PurchasingPowerPage() {
                         />
                       </linearGradient>
                       {showSolution && (
-                        <linearGradient
-                          id="colorInvest"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#34d399"
-                            stopOpacity={0.3}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#34d399"
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
+                        <>
+                          <linearGradient
+                            id="colorInvestNominal"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#c084fc"
+                              stopOpacity={0.2}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#c084fc"
+                              stopOpacity={0}
+                            />
+                          </linearGradient>
+                          <linearGradient
+                            id="colorInvest"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#34d399"
+                              stopOpacity={0.3}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#34d399"
+                              stopOpacity={0}
+                            />
+                          </linearGradient>
+                        </>
                       )}
                     </defs>
                     <CartesianGrid
@@ -405,15 +432,25 @@ export default function PurchasingPowerPage() {
                       fill="url(#colorReal)"
                     />
                     {showSolution && (
-                      <Area
-                        type="monotone"
-                        dataKey={DATA_KEY_INVEST}
-                        stroke="#34d399"
-                        strokeWidth={3}
-                        strokeDasharray="5 5"
-                        fillOpacity={1}
-                        fill="url(#colorInvest)"
-                      />
+                      <>
+                        <Area
+                          type="monotone"
+                          dataKey={DATA_KEY_INVEST_NOMINAL}
+                          stroke="#c084fc"
+                          strokeWidth={2}
+                          strokeDasharray="4 4"
+                          fillOpacity={1}
+                          fill="url(#colorInvestNominal)"
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey={DATA_KEY_INVEST}
+                          stroke="#34d399"
+                          strokeWidth={3}
+                          fillOpacity={1}
+                          fill="url(#colorInvest)"
+                        />
+                      </>
                     )}
                   </AreaChart>
                 </ResponsiveContainer>
