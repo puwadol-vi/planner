@@ -28,7 +28,7 @@ export default function Home() {
             </div>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight mt-4">
-            Free your time with system (Bitcoin)
+            AABCEDF
           </h1>
         </header>
 
@@ -88,7 +88,7 @@ export default function Home() {
           </p>
           <p className="text-slate-400 mb-2">เเละนี่คือสิ่งที่ทำให้คุณเปลี่ยนเเปลงใน</p>
           <p className="text-slate-400 font-bold border-b border-slate-400/50 pb-0.5 inline-block mb-4">
-            Free your time with system (Bitcoin)
+            AABCEDF
           </p>
           <ul className="space-y-2 text-slate-400 list-disc list-inside mb-4">
             <li>เข้าใจระบบการเงินปัจจุบันที่คุณอยู่ ว่าสามารถพิมพ์เงินได้ เเละ ลดมูลค่าเงินในกระเป๋าของคุณ</li>
@@ -134,7 +134,7 @@ export default function Home() {
           <div className="flex gap-4">
             <span className="text-3xl shrink-0">💡</span>
             <p className="text-slate-200 font-semibold leading-relaxed">
-              Free your time with system (Bitcoin) ช่วยให้คุณ มี ระบบ ในการเก็บเงินเพื่อซื้อ เวลา ของคุณในอนาคต
+              AABCEDF ช่วยให้คุณ มี ระบบ ในการเก็บเงินเพื่อซื้อ เวลา ของคุณในอนาคต
             </p>
           </div>
         </section>
@@ -148,10 +148,10 @@ export default function Home() {
           สมัคร Inbox Message
         </a>
 
-        {/* ➡️ เนื้อหา Free your time with system (Bitcoin) */}
+        {/* ➡️ เนื้อหา AABCEDF */}
         <section className="mb-10">
           <h2 className="text-xl font-semibold text-slate-200 mb-6">
-            ➡️เนื้อหา Free your time with system (Bitcoin)
+            ➡️เนื้อหา AABCEDF
           </h2>
 
           <h3 className="text-base font-semibold text-slate-300 mt-6 mb-2">Part 1 Problem</h3>
